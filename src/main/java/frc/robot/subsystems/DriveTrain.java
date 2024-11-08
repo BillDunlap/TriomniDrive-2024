@@ -4,9 +4,10 @@
 
 package frc.robot.subsystems;
 
-import com.kauailabs.navx.AHRSProtocol;
+// import com.kauailabs.navx.AHRSProtocol;
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -23,9 +24,16 @@ public class DriveTrain extends SubsystemBase {
   /** Creates a new DriveTrain. */
   public DriveTrain() {
     m_front = new OmniWheel(1, "front", Constants.kWheelDiameterFt);
+    addChild("FRONT", m_front);
+    SendableRegistry.add(m_front, "theFront");
+    SmartDashboard.putData(m_front);
     m_right = new OmniWheel(2, "right", Constants.kWheelDiameterFt);
+    addChild("RIGHT", m_right);
     m_left = new OmniWheel(3, "left", Constants.kWheelDiameterFt);
+    addChild("LeFt", m_left);
     m_ahrs = new AHRS(SPI.Port.kMXP);
+    addChild("navx", m_ahrs);
+    SendableRegistry.setName(m_ahrs, "DriveTr", "gyro");
     // The AHRS has not settled down on an angle yet when
     // the constructor for drive train is called.
     setZeroAngleDegrees(0.0); // assume 'front' wheel points 'ahead'

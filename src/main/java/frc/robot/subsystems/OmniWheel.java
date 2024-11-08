@@ -5,8 +5,10 @@
 package frc.robot.subsystems;
 
 import frc.robot.Constants;
-import frc.robot.TuningVariables;
+//import frc.robot.TuningVariables;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+// import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
@@ -23,6 +25,7 @@ public class OmniWheel extends SubsystemBase {
   private final double m_clicksPerRevolution = 360 * 4;
   private final double m_nativeUnitsOverRevolutionsPerSecond;
   private final double m_nativeUnitsOverFeetPerSecond;  
+  private double m_kF;
   /** Creates a new OmniWheel, controlled by a TalonSRX motor controller
    *  @param canID:  CAN bus identifier for the motor controller
    *  @param name: a name for the wheel to be used in SmartDashboard displays
@@ -46,10 +49,22 @@ public class OmniWheel extends SubsystemBase {
     // Later I found that kI is essential when kF is not known well.
     // When on blocks typical accumulated deficits were 25-75 thousand when
     // requested speed was 150 or 200.
-    m_talonsrx.config_kF(Constants.TalonSRX.kDriveTrainPIDLoopIndex, 1.15); // feed-forward
+    // The above was written by me a few years ago.  It is wrong.  I should
+    // figure out a better (bigger, I think - units are Volts/SpeedUnit) kF and set kI to 0.
+    setKF(1.15);
     m_talonsrx.config_kP(Constants.TalonSRX.kDriveTrainPIDLoopIndex, 1.2);
-    m_talonsrx.config_kI(Constants.TalonSRX.kDriveTrainPIDLoopIndex, 0.0006);
-    m_talonsrx.config_kD(Constants.TalonSRX.kDriveTrainPIDLoopIndex, 0.0);  
+    m_talonsrx.config_kI(Constants.TalonSRX.kDriveTrainPIDLoopIndex, 0.0);
+    m_talonsrx.config_kD(Constants.TalonSRX.kDriveTrainPIDLoopIndex, 0.0); 
+    SmartDashboard.putData(this); 
+  }
+
+  /**
+   * set feed forward parameter.
+   * @param kF feed forward parameter.  Units are Volts per Clicks/100Milliseconds.
+   */
+  private void setKF(double kF){
+    m_kF = kF;
+    m_talonsrx.config_kF(Constants.TalonSRX.kDriveTrainPIDLoopIndex, m_kF); 
   }
  
   /** Set the speed of the wheel on a scale of-1 to 1. 
@@ -72,26 +87,21 @@ public class OmniWheel extends SubsystemBase {
 
   /** set target velocity in "native" units: ticks per 100 milliseconds */
   public void setVelocityNativeUnits(double clicksPer100Ms) {
-    if (TuningVariables.debugLevel.get() >= 3) {
-      SmartDashboard.putNumber("set native v: ", clicksPer100Ms);
-    }
     m_talonsrx.set(ControlMode.Velocity, clicksPer100Ms);
   }
 
   @Override
   public void periodic() {
-    double v = m_talonsrx.getSelectedSensorVelocity();
-    if (TuningVariables.debugLevel.get() >= 3) {
-      SmartDashboard.putNumber("Velocity" + "(" + m_name + ")", v);
-      SmartDashboard.putNumber("Velocity" + "(" + m_name + ")" + " text", v);
-    }
-    double p = m_talonsrx.getMotorOutputPercent();
-    if (TuningVariables.debugLevel.get() >= 3) {
-      SmartDashboard.putNumber("Omniwheel power" + "(" + m_name + ")", p);
-    }
-    double i = m_talonsrx.getIntegralAccumulator();
-    if (TuningVariables.debugLevel.get() >= 3) {
-      SmartDashboard.putNumber("Int Acc" + "(" + m_name + ")", i);
-    }
+    // perhaps use this to collect sensor information to avoid double collection.
+  }
+
+  @Override
+  public void initSendable(SendableBuilder builder) {
+    super.initSendable(builder); // is this needed? or desirable?
+    builder.addDoubleProperty("percentPower", () -> m_talonsrx.getMotorOutputPercent(), null);
+    builder.addDoubleProperty("velocity", () -> m_talonsrx.getSelectedSensorVelocity(), null);
+    builder.addDoubleProperty("integral accumulation",() -> m_talonsrx.getIntegralAccumulator(), null);
+    builder.addDoubleProperty("kF", () -> m_kF, this::setKF);
+    // builder.addDoubleProperty("setpoint", this::getSetpoint, this::setSetpoint);     builder.addDoubleProperty("velocity", m_talonsrx.getSelectedSensorVelocity());
   }
 }

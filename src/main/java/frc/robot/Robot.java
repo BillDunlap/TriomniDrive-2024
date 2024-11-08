@@ -7,6 +7,7 @@ package frc.robot;
 import org.littletonrobotics.urcl.URCL;
 
 import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -34,6 +35,7 @@ public class Robot extends TimedRobot {
     m_robotContainer = new RobotContainer();
     System.out.println("*** Finishing robotInit");
     DataLogManager.start();
+    DriverStation.startDataLog(DataLogManager.getLog());
     URCL.start(); // Log info from REV devices on the CAN bus
     // If logging only to DataLog (and not to NetworkTables)
     // replace the above two lines with: URCL.start(DataLogManager.getLog());

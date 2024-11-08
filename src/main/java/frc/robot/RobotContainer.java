@@ -43,8 +43,12 @@ public class RobotContainer {
     
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    m_driveTrain.setName("The Drive Train");
     SmartDashboard.putData(m_driveTrain); // show commands controlling the drive train
+    
+    m_ledStrip.setName("the led strip");
     SmartDashboard.putData(m_ledStrip);
+    
     // m_SparkMaxBrushless.setPIDCoefficients(0.000080, 0.0, 0.0, 0.0, 0.000170, -1.0, 1.0);
     configureButtonBindings();
     m_driveTrain.setDefaultCommand(new DefaultTeleop(m_driveTrain, m_controller, m_rumbler));
@@ -78,7 +82,10 @@ public class RobotContainer {
 
     // Pressing 'B' causes it to go to AprilTag 1.  Interrupt search when button is released
     JoystickButton bButton = new JoystickButton(m_controller, XboxController.Button.kB.value);
-    bButton.whileTrue(new GoToApriltag(1, m_driveTrain, m_apriltagInfo).andThen(new RumbleController(m_rumbler, 0.5, 0.5)));
+    bButton.whileTrue(
+      new GoToApriltag(1, m_driveTrain, m_apriltagInfo)
+      .andThen(new RumbleController(m_rumbler, 0.5, 0.5))
+      );
     // 'X' toggles blinking of LEDs
     JoystickButton xButton = new JoystickButton(m_controller, XboxController.Button.kX.value);
     xButton.toggleOnTrue(new BlinkLED(m_ledStrip,
@@ -90,7 +97,8 @@ public class RobotContainer {
       0.1,
       ChaseLED.Direction.kOut, 
       new Color[]{ Color.kViolet, Color.kBlueViolet, Color.kBlue, Color.kAqua,
-        Color.kGreen, Color.kYellowGreen, Color.kYellow, Color.kWhite}));
+        Color.kGreen, Color.kYellowGreen, Color.kYellow, Color.kWhite})
+      );
     // right 'bumper' toggles Xmas lights
     // (We've run out of buttons on the Xbox controller - the 
     // drive train's default command uses the buttons to do
