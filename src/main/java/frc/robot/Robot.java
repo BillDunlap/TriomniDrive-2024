@@ -39,6 +39,9 @@ public class Robot extends TimedRobot {
     URCL.start(); // Log info from REV devices on the CAN bus
     // If logging only to DataLog (and not to NetworkTables)
     // replace the above two lines with: URCL.start(DataLogManager.getLog());
+    enableLiveWindowInTest(true); // see Smart Dashboard chapter in WPIlib manual
+      // Enabling LiveWindow in Test mode makes grouping via subsystem.setName or SendableRegistry.setChild work
+      // (while running in Test mode via the Driver Station)
   }
 
   /**
